@@ -1,1 +1,3 @@
 # autotrading
+
+go build
