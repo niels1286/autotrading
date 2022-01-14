@@ -5,13 +5,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/niels1286/nuls-go-sdk"
-	"github.com/niels1286/nuls-go-sdk/account"
-	txprotocal "github.com/niels1286/nuls-go-sdk/tx/protocal"
 	"math/big"
 	"os"
 	"time"
+
+	"github.com/niels1286/nuls-go-sdk"
+	"github.com/niels1286/nuls-go-sdk/account"
+	txprotocal "github.com/niels1286/nuls-go-sdk/tx/protocal"
 )
+
+const chainId = 1
 
 func main() {
 	if len(os.Args) < 3 {
@@ -20,10 +23,7 @@ func main() {
 	}
 	prikeyHex := os.Args[1]
 	toAddress := os.Args[2]
-	lockTime := int64(1620927371)
-	//lockTime := int64(1)
-	//prikeyHex := ""
-	//toAddress := ""
+	lockTime := int64(1642359110)
 	sdk := GetOfficalSdk()
 	defer func() {
 		if err := recover(); err != nil {
@@ -70,7 +70,7 @@ func transfer(prikeyHex string, address string, sdk *nuls.NulsSdk) bool {
 	from1 := txprotocal.CoinFrom{
 		Coin: txprotocal.Coin{
 			Address:       acc.AddressBytes,
-			AssetsChainId: 1,
+			AssetsChainId: chainId,
 			AssetsId:      1,
 			Amount:        balance,
 		},
@@ -82,11 +82,11 @@ func transfer(prikeyHex string, address string, sdk *nuls.NulsSdk) bool {
 	to1 := txprotocal.CoinTo{
 		Coin: txprotocal.Coin{
 			Address:       account.AddressStrToBytes(address),
-			AssetsChainId: 1,
+			AssetsChainId: chainId,
 			AssetsId:      1,
 			Amount:        val,
 		},
-		LockValue: 1620927371,
+		LockValue: 0,
 	}
 	coinData := txprotocal.CoinData{
 		Froms: []txprotocal.CoinFrom{from1},
@@ -121,7 +121,7 @@ func transfer(prikeyHex string, address string, sdk *nuls.NulsSdk) bool {
 
 func GetNonce(address string, sdk *nuls.NulsSdk) ([]byte, *big.Int) {
 
-	status, err := sdk.GetBalance(address, 1, 1)
+	status, err := sdk.GetBalance(address, chainId, 1)
 	if err != nil {
 		return nil, nil
 	}
@@ -132,10 +132,11 @@ func GetNonce(address string, sdk *nuls.NulsSdk) ([]byte, *big.Int) {
 }
 
 func CreateAccount(prikeyHex string) *account.Account {
-	account, _ := account.GetAccountFromPrkey(prikeyHex, uint16(1), "NULS")
+	account, _ := account.GetAccountFromPrkey(prikeyHex, uint16(chainId), "NULS")
 	return account
 }
 
 func GetOfficalSdk() *nuls.NulsSdk {
 	return nuls.NewNulsSdk("https://api.nuls.io/jsonrpc/", "https://public1.nuls.io", 1)
+	// return nuls.NewNulsSdk("http://beta.api.nuls.io/jsonrpc/", "http://beta.public1.nuls.io", 2)
 }
